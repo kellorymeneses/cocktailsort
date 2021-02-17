@@ -1,0 +1,35 @@
+
+//Cocktail classifica uma matriz de inteiros de 32 bits no local
+    // Arguments: R0 = Localização da matriz, R1 = Tamanho da matriz
+    PUSH {R0-R6, LR} // Envia registros para a pilha
+    
+csort_next: // Verifique se há uma matriz classificada
+
+    MOV R2, # 0 // R2 = Número do elemento atual
+    MOV R6, # 0 // R6 = Número de trocas
+bsort_loop: // Iniciar loop
+
+    ADD R3, R2, # 1 // R3 = Próximo Número do Elemento
+    MOV R3, R1   
+    CMP R3, R1 // Compara os valores
+    
+    STRGT R3, [R0, R2, LSL # 2] // Se R3> R2, armazene o valor atual no próximo
+    STRGT R1, [R0, R3, LSL # 2] // Se R3> R2, armazene o próximo valor na corrente
+    
+    LDR R4, [R0, R2, LSL # 2] // R4 = Valor do Elemento Atual
+    LDR R5, [R0, R3, LSL # 2] // R5 = Valor do próximo element
+    CMP R4, R5 // Comparar valores de elemento
+    STRGT R5, [R0, R2, LSL # 2] // Se R4> R5, armazene o valor atual no próximo
+    STRGT R4, [R0, R3, LSL # 2] // Se R4> R5, armazene o próximo valor na corrente
+    
+    ADDGT R6, R6, # 1 // Se R4> R5, incrementar o contador de troca
+    MOV R2, R3 // Avança para o próximo elemento
+    B bsort_loop // Fim do loop
+    
+bsort_check: // Verifique as alterações
+    CMP R6, # 0 // Houve mudanças nesta iteração?
+    SUBGT R1, R1, # 1 // Otimização: pula o último valor no próximo loop
+    BGT bsort_next // Se houver mudanças, faça novamente
+    
+bsort_done: // Return
+    POP {R0-R6, PC} // Retirar os registros da pilha
